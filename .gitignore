@@ -1,0 +1,15 @@
+node_modules
+# Keep environment variables out of version control
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# macOS
+.DS_Store
