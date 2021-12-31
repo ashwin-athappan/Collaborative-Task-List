@@ -19,6 +19,18 @@ const ToDoItem = ({ todo, onSubmit }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [content, setContent] = useState('');
 
+	const [updateItem] = useMutation(UPDATE_TODO);
+
+	const callUpdateItem = () => {
+		updateItem({
+			variables: {
+				id: todo.id,
+				content,
+				isCompleted: isChecked,
+			}
+		});
+	}
+
 	const input = useRef(null);
 
 	useEffect(() => {
@@ -52,6 +64,7 @@ const ToDoItem = ({ todo, onSubmit }) => {
 				isChecked={isChecked}
 				onPress={() => {
 					setIsChecked(!isChecked);
+					callUpdateItem();
 				}}
 			/>
 
@@ -67,6 +80,7 @@ const ToDoItem = ({ todo, onSubmit }) => {
 					marginLeft: 12,
 				}}
 				multiline
+				onEndEditing={callUpdateItem}
 				onSubmitEditing={onSubmit}
 				blurOnSubmit
 				onKeyPress={onKeyPress}

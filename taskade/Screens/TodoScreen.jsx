@@ -44,13 +44,18 @@ const CREATE_NEW_TODO = gql`
 	}
 `;
 
+
 const TodoScreen = ({ navigation, route }) => {
 	const [title, setTitle] = useState(route.params.title);
 	const [todos, setTodos] = useState([]);
 
 	const [
 		updateTaskList,
-		{ data: taskListTitleData, loading: taskListLoading, error: taskListError },
+		{
+			data: taskListTitleData,
+			loading: taskListLoading,
+			error: taskListError,
+		},
 	] = useMutation(UPDATE_TASK_LIST);
 
 	const {
@@ -70,6 +75,7 @@ const TodoScreen = ({ navigation, route }) => {
 	] = useMutation(CREATE_NEW_TODO, {
 		onCompleted: todoRefetch,
 	});
+
 
 	useEffect(() => {
 		if (taskListTitleData) {
@@ -94,7 +100,7 @@ const TodoScreen = ({ navigation, route }) => {
 	const handleTitleChange = (text) => {
 		updateTaskList({ variables: { id: route.params.id, title: text } });
 	};
-
+	
 	return (
 		<KeyboardAvoidingView
 			// behavior={Platform.OS === 'android' ? 'padding' : 'height'}
@@ -123,7 +129,10 @@ const TodoScreen = ({ navigation, route }) => {
 					<FlatList
 						data={todos}
 						renderItem={({ item, index }) => (
-							<ToDoItem todo={item} onSubmit={() => createNewItem(index + 1)} />
+							<ToDoItem
+								todo={item}
+								onSubmit={() => createNewItem(index + 1)}
+							/>
 						)}
 						style={{ width: '100%' }}
 					/>
