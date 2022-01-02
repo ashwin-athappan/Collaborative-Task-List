@@ -148,6 +148,7 @@ const resolvers = {
 			if (!user) {
 				throw new Error('Authentication Error. Please Sign In');
 			}
+			await db.collection('Todo').deleteMany({ taskList: ObjectId(id) });
 			const result = await db
 				.collection('TaskList')
 				.deleteOne({ _id: ObjectId(id) });

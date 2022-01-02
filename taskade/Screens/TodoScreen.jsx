@@ -44,6 +44,11 @@ const CREATE_NEW_TODO = gql`
 	}
 `;
 
+const DELETE_TODO = gql`
+	mutation deleteTodo($id: ID!) {
+		deleteTodo(id: $id)
+	}
+`;
 
 const TodoScreen = ({ navigation, route }) => {
 	const [title, setTitle] = useState(route.params.title);
@@ -76,6 +81,9 @@ const TodoScreen = ({ navigation, route }) => {
 		onCompleted: todoRefetch,
 	});
 
+	const [deleteTodo] = useMutation(DELETE_TODO, {
+		onCompleted: todoRefetch,
+	});
 
 	useEffect(() => {
 		if (taskListTitleData) {
@@ -97,10 +105,15 @@ const TodoScreen = ({ navigation, route }) => {
 		createTodo({ variables: { content: '', id: route.params.id } });
 	};
 
+	const deleteItem = (id) => {
+		console.log('delete');
+		deleteTodo({ variables: { id } });
+	};
+
 	const handleTitleChange = (text) => {
 		updateTaskList({ variables: { id: route.params.id, title: text } });
 	};
-	
+
 	return (
 		<KeyboardAvoidingView
 			// behavior={Platform.OS === 'android' ? 'padding' : 'height'}
@@ -132,6 +145,7 @@ const TodoScreen = ({ navigation, route }) => {
 							<ToDoItem
 								todo={item}
 								onSubmit={() => createNewItem(index + 1)}
+								onDelete={(id) => deleteItem(id)}
 							/>
 						)}
 						style={{ width: '100%' }}
@@ -139,7 +153,7 @@ const TodoScreen = ({ navigation, route }) => {
 				) : (
 					<ToDoItem
 						todo={{ content: '', isCompleted: false }}
-						onSubmit={() => createNewItem(index + 1)}
+						onSubmit={() => createNewItem(1)}
 					/>
 				)}
 			</View>

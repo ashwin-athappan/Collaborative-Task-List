@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text } from 'react-native';
 
 import { useMutation, gql } from '@apollo/client';
 
@@ -15,11 +15,14 @@ const UPDATE_TODO = gql`
 	}
 `;
 
-const ToDoItem = ({ todo, onSubmit }) => {
+
+
+const ToDoItem = ({ todo, onSubmit, onDelete }) => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [content, setContent] = useState('');
 
 	const [updateItem] = useMutation(UPDATE_TODO);
+	
 
 	const callUpdateItem = () => {
 		updateItem({
@@ -27,8 +30,12 @@ const ToDoItem = ({ todo, onSubmit }) => {
 				id: todo.id,
 				content,
 				isCompleted: isChecked,
-			}
+			},
 		});
+	};
+
+	const callDeleteItem = () => {
+		onDelete(todo.id);
 	}
 
 	const input = useRef(null);
@@ -48,16 +55,14 @@ const ToDoItem = ({ todo, onSubmit }) => {
 		}
 	}, [input]);
 
-	const onKeyPress = ({ nativeEvent }) => {
-		if (nativeEvent.key === 'Backspace' && content === '') {
-			// Delete item
-			console.warn('Delete item');
-		}
-	};
 
 	return (
 		<View
-			style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 3 }}
+			style={{
+				flexDirection: 'row',
+				alignItems: 'center',
+				marginVertical: 3,
+			}}
 		>
 			{/* Checkbox */}
 			<Checkbox
@@ -83,8 +88,12 @@ const ToDoItem = ({ todo, onSubmit }) => {
 				onEndEditing={callUpdateItem}
 				onSubmitEditing={onSubmit}
 				blurOnSubmit
-				onKeyPress={onKeyPress}
 			/>
+			<TouchableOpacity
+				onPress={callDeleteItem}
+			>
+				<Text style={{color: 'red'}}>Delete</Text>
+			</TouchableOpacity>
 		</View>
 	);
 };
