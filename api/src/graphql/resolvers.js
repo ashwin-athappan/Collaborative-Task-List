@@ -182,6 +182,35 @@ const resolvers = {
 			return taskList;
 		},
 
+		addEmailToTaskList: async (_, { taskListId, email }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+			const taskList = await db
+				.collection('TaskList')
+				.findOne({ _id: ObjectId(taskListId) });
+			if (!taskList) {
+				return null;
+			}
+
+			const user = await db.collection('Users').findOne({ email });
+
+			if (
+				taskList.userIds.find((uid) => uid.toString() === userId.toString())
+			) {
+				return taskList;
+			}
+
+			// const result = await db
+			// 	.collection('TaskList')
+			// 	.updateOne(
+			// 		{ _id: ObjectId(taskListId) },
+			// 		{ $push: { userIds: ObjectId(userId) } }
+			// 	);
+			taskList.userIds.push(ObjectId(userId));
+			return taskList;
+		},
+
 		createTodo: async (_, { content, taskListId }, { db, user }) => {
 			if (!user) {
 				throw new Error('Authentication Error. Please sign in');
