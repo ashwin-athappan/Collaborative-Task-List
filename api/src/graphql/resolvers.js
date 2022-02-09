@@ -97,9 +97,14 @@ const resolvers = {
 		signIn: async (_, { input }, { db }) => {
 			let user;
 			try {
-				user = await db.collection('Users').findOne({ email: input.email });
+				user = await db
+					.collection('Users')
+					.findOne({ email: input.email });
 
-				if (!user || !bcrypt.compareSync(input.password, user.password)) {
+				if (
+					!user ||
+					!bcrypt.compareSync(input.password, user.password)
+				) {
 					throw 'Invalid credentials';
 				}
 			} catch (e) {
@@ -122,7 +127,9 @@ const resolvers = {
 				userIds: [user._id],
 			};
 
-			const result = await db.collection('TaskList').insertOne(newTaskList);
+			const result = await db
+				.collection('TaskList')
+				.insertOne(newTaskList);
 			const createdTaskList = await db
 				.collection('TaskList')
 				.findOne({ _id: result.insertedId });
@@ -141,7 +148,9 @@ const resolvers = {
 					},
 				}
 			);
-			return await db.collection('TaskList').findOne({ _id: ObjectId(id) });
+			return await db
+				.collection('TaskList')
+				.findOne({ _id: ObjectId(id) });
 		},
 
 		deleteTaskList: async (_, { id }, { db, user }) => {
@@ -167,7 +176,9 @@ const resolvers = {
 			}
 			console.log(ObjectId(userId));
 			if (
-				taskList.userIds.find((uid) => uid.toString() === userId.toString())
+				taskList.userIds.find(
+					(uid) => uid.toString() === userId.toString()
+				)
 			) {
 				return taskList;
 			}
@@ -193,21 +204,25 @@ const resolvers = {
 				return null;
 			}
 
-			const user = await db.collection('Users').findOne({ email });
+			const userData = await db.collection('Users').findOne({ email });
 
+			const userId = userData._id;
+			console.log(userId);
 			if (
-				taskList.userIds.find((uid) => uid.toString() === userId.toString())
+				taskList.userIds.find(
+					(uid) => uid.toString() === userId.toString()
+				)
 			) {
 				return taskList;
 			}
 
-			// const result = await db
-			// 	.collection('TaskList')
-			// 	.updateOne(
-			// 		{ _id: ObjectId(taskListId) },
-			// 		{ $push: { userIds: ObjectId(userId) } }
-			// 	);
-			taskList.userIds.push(ObjectId(userId));
+			const result = await db
+				.collection('TaskList')
+				.updateOne(
+					{ _id: ObjectId(taskListId) },
+					{ $push: { userIds: userId } }
+				);
+			taskList.userIds.push(userId);
 			return taskList;
 		},
 
@@ -233,7 +248,10 @@ const resolvers = {
 			}
 			const updatedTodo = await db
 				.collection('Todo')
-				.updateOne({ _id: ObjectId(id) }, { $set: { content, isCompleted } });
+				.updateOne(
+					{ _id: ObjectId(id) },
+					{ $set: { content, isCompleted } }
+				);
 			return await db.collection('Todo').findOne({ _id: ObjectId(id) });
 		},
 
@@ -256,7 +274,9 @@ const resolvers = {
 	Todo: {
 		id: ({ _id, id }) => _id || id,
 		taskList: async ({ taskList }, _, { db }) => {
-			const res = await db.collection('TaskList').findOne({ _id: taskList });
+			const res = await db
+				.collection('TaskList')
+				.findOne({ _id: taskList });
 			return res;
 		},
 	},
@@ -264,19 +284,24 @@ const resolvers = {
 	TaskList: {
 		id: ({ _id, id }) => _id || id,
 		progress: async ({ _id }, _, { db }) => {
-			const todos = await db.collection('Todo').find({taskList: ObjectId(_id)}).toArray();
+			const todos = await db
+				.collection('Todo')
+				.find({ taskList: ObjectId(_id) })
+				.toArray();
 
 			if (todos.length === 0) {
 				return 0;
 			}
 
-			const completed = todos.filter(todo => todo.isCompleted);
+			const completed = todos.filter((todo) => todo.isCompleted);
 
-			return 100 * completed.length / todos.length;
+			return (100 * completed.length) / todos.length;
 		},
 		users: async ({ userIds }, _, { db }) =>
 			Promise.all(
-				userIds.map((userId) => db.collection('Users').findOne({ _id: userId }))
+				userIds.map((userId) =>
+					db.collection('Users').findOne({ _id: userId })
+				)
 			),
 		todos: async ({ _id }, _, { db }) =>
 			await db

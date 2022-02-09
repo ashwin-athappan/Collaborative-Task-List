@@ -37,6 +37,7 @@ const typeDefs = gql`
 		getTaskList(id: ID!): TaskList!
 		getAllTaskList: [TaskList!]!
 		getUser: User!
+		getTaskListUsers: [User!]!
 	}
 
 	input SignUpInput {
